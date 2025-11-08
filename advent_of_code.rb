@@ -15,7 +15,7 @@ class AdventOfCode
 
   def self.run(input_day, part)
     formatted_day = "%02d" % input_day.to_i
-    input_filename = File.join("input", "day#{formatted_day}_input.txt")
+    input_filename = File.join("input", "day#{formatted_day}.txt")
     input = File.read(input_filename).strip
     class_filename = File.join("lib", "day#{formatted_day}.rb")
     require_relative class_filename
