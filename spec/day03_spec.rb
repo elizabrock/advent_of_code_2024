@@ -5,7 +5,7 @@ require_relative 'spec_helper'
 describe Day3 do
   let(:input) {
     <<~STRING
-      xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
+      xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))
     STRING
   }
 
@@ -19,7 +19,7 @@ describe Day3 do
 
   describe "part2" do
     it "overall scenario" do
-      expected = "TBD"
+      expected = 48
       actual = Day3.part2(input)
       _(actual).must_equal(expected)
     end
