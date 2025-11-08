@@ -3,13 +3,21 @@ require_relative 'spec_helper'
 # http://adventofcode.com/2024/day/4
 
 describe Day4 do
-    let(:short_example) {
+    let(:short_part1_example) {
       <<~STRING
         ..X...
         .SAMX.
         .A..A.
         XMAS.S
         .X....
+      STRING
+    }
+
+    let(:short_part2_example) {
+      <<~STRING
+        M.S
+        .A.
+        M.S
       STRING
     }
 
@@ -31,7 +39,7 @@ describe Day4 do
   describe "part1" do
     it "short example scenario" do
       expected = 4
-      actual = Day4.part1(short_example)
+      actual = Day4.part1(short_part1_example)
       _(actual).must_equal(expected)
     end
 
@@ -43,10 +51,15 @@ describe Day4 do
   end
 
   describe "part2" do
-    it "overall scenario" do
-      input = ""
-      expected = "TBD"
-      actual = Day4.part2(input)
+    it "short example scenario" do
+      expected = 1
+      actual = Day4.part2(short_part2_example)
+      _(actual).must_equal(expected)
+    end
+
+    it "long example scenario" do
+      expected = 9
+      actual = Day4.part2(long_example)
       _(actual).must_equal(expected)
     end
   end
