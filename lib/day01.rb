@@ -1,9 +1,12 @@
 class Day1
-  def self.part1(input)
-    input = input.split(/\n/).map do |line|
+  def self.parse_input(input)
+    input.split(/\n/).map do |line|
       line.split(/\s+/).map(&:to_i)
     end
-    left_side, right_side = input.transpose
+  end
+
+  def self.part1(input)
+    left_side, right_side = self.parse_input(input).transpose
     left_side.sort!
     right_side.sort!
     pairs = left_side.zip(right_side)
@@ -14,5 +17,11 @@ class Day1
   end
 
   def self.part2(input)
+    left_side, right_side = self.parse_input(input).transpose
+    frequency = right_side.group_by{|i| i}
+    similarity_scores = left_side.map do
+      |number| number * (frequency[number]&.count || 0)
+    end
+    similarity_scores.reduce(:+)
   end
 end
