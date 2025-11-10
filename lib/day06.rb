@@ -1,11 +1,11 @@
 require 'matrix'
+require 'delegate'
 
 class Day6
   def self.part1(input)
-    guard = Guard.new(input)
-    while guard.on_grid?
-      guard.travel!
-    end
+    map = Map.new(input)
+    guard = Guard.new(map)
+    guard.travel_indefinitely!
     guard.unique_positions_patrolled_count
   end
 
@@ -16,73 +16,121 @@ class Day6
   private
 
   class Guard
-    attr_reader :grid
-    MARK = 'X'
-    OBSTRUCTION = '#'
-    RULES = [
-      {symbol: '^', x_inc: -1, y_inc:  0, next_symbol: '>'},
-      {symbol: '>', x_inc:  0, y_inc:  1, next_symbol: 'v'},
-      {symbol: 'v', x_inc:  1, y_inc:  0, next_symbol: '<'},
-      {symbol: '<', x_inc:  0, y_inc: -1, next_symbol: '^'}
-    ]
-
-    def initialize(input)
-      grid = input.split(/\n/).map{ |line| line.split(//) }
-      @grid = Matrix[*grid]
-      @current_x, @current_y = discover_current_position
-      @current_direction = find_current_direction
+    def initialize(map)
+      @map = map
+      @x, @y = discover_current_position
+      if on_map?
+        @direction = Day6::Guard::RULES.find{|rule| rule[:symbol] == @map[@x, @y] }
+      end
     end
 
     def current_map(with_path: false)
-      @grid.to_a.map{ |row| row.map{ |char| (!with_path && char == MARK)? '.' : char }.join }.join("\n")
-    end
-
-    def on_grid?
-      @current_x >= 0 && @current_x < @grid.column_count && @current_y >= 0 && @current_y < @grid.row_count
+      @map.to_a(with_path: with_path)
     end
 
     def travel!
       if travel_obstructed?
         turn!
       end
-      until travel_obstructed? or !on_grid?
+      while can_continue_traveling? and !travel_obstructed?
         move_forward!
       end
     end
 
+    def travel_indefinitely!
+      while can_continue_traveling?
+        travel!
+      end
+    end
+
+    def can_continue_traveling?
+      on_map?
+    end
+
     def unique_positions_patrolled_count
-      count = 0
-      @grid.each{|cell| count += 1 if cell == MARK }
-      count
+      @map.count{ |cell| cell == Day6::Map::MARK }
     end
 
     private
 
-    def find_current_direction
-      return unless @current_x and @current_y
-      RULES.find{|rule| rule[:symbol] == @grid[@current_x, @current_y] }
+    def self.calculate_rules
+      west_rule = {symbol: '<', x_inc:  0, y_inc: -1}
+      south_rule = {symbol: 'v', x_inc:  1, y_inc:  0, next_rule: west_rule}
+      east_rule = {symbol: '>', x_inc:  0, y_inc:  1, next_rule: south_rule}
+      north_rule = {symbol: '^', x_inc: -1, y_inc:  0, next_rule: east_rule}
+      west_rule[:next_rule] = north_rule
+      [north_rule, east_rule, south_rule, west_rule]
     end
+    RULES = Day6::Guard::calculate_rules
 
     def discover_current_position
-      RULES.map{ |rule| @grid.index(rule[:symbol]) }.compact.first
+      direction_symbols = RULES.map{ |rule| rule[:symbol] }
+      @map.index{ |char| direction_symbols.include? char }
     end
 
     def move_forward!
-      @grid[@current_x, @current_y] = MARK
-      @current_x += @current_direction[:x_inc]
-      @current_y += @current_direction[:y_inc]
-      @grid[@current_x, @current_y] = @current_direction[:symbol] if on_grid?
+      @map.mark_leaving!(@x, @y)
+      @x += @direction[:x_inc]
+      @y += @direction[:y_inc]
+      @map.mark_entering!(@x, @y, @direction[:symbol])
+    end
+
+    def on_map?
+      return false unless @x && @y
+      @map.valid_coordinate?(@x, @y)
     end
 
     def travel_obstructed?
-      next_x = @current_x + @current_direction[:x_inc]
-      next_y = @current_y + @current_direction[:y_inc]
-      @grid[next_x, next_y] == OBSTRUCTION
+      next_x = @x + @direction[:x_inc]
+      next_y = @y + @direction[:y_inc]
+      @map.can_stand_at?(next_x, next_y)
     end
 
     def turn!
-      @grid[@current_x, @current_y] = @current_direction[:next_symbol]
-      @current_direction = find_current_direction
+      @direction = @direction[:next_rule]
+      @map.mark_turning!(@x, @y, @direction[:symbol])
+    end
+  end
+
+  class Map < SimpleDelegator
+    OPEN_SPACE = '.'
+    MARK = 'X'
+    NATURAL_OBSTRUCTION = '#'
+    ADDED_OBSTRUCTION = 'O'
+
+    def initialize(input)
+      grid = (input.is_a? Array)? input : input.split(/\n/).map{ |line| line.split(//) }
+      super(Matrix[*grid])
+    end
+
+    def can_stand_at?(x, y)
+      self[x, y] == NATURAL_OBSTRUCTION
+    end
+
+    def mark_entering!(x, y, direction)
+      return unless valid_coordinate?(x, y)
+      self[x, y] = direction
+    end
+
+    def mark_leaving!(x, y)
+      self[x, y] = MARK
+    end
+
+    def mark_turning!(x, y, direction)
+      mark_entering!(x, y, direction)
+    end
+
+    def valid_coordinate?(x, y)
+      x >= 0 && x < column_count && y >= 0 && y < row_count
+    end
+
+    def to_a(with_path: false)
+      if with_path
+        super()
+      else
+        # NOTE: Now that this is a proper class, we can probably avoid making the interim arrays
+        super().map{ |row| row.map{ |char| (char == Day6::Map::MARK)? OPEN_SPACE : char } }
+      end
     end
   end
 end

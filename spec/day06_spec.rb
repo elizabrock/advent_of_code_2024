@@ -111,55 +111,47 @@ describe Day6 do
   end
 
   describe Day6::Guard do
-    describe "on_grid?" do
-      it "is true when the guard is on the map" do
-        guard = Day6::Guard.new(grid_state_at_end)
-        assert guard.on_grid?
-        guard.travel!
-        refute guard.on_grid?
-      end
-    end
-
     describe "travel!" do
       it "travels in same direction until an obstacle is reached" do
-        expected = Day6::Guard.new(grid_state_two).current_map
-        guard = Day6::Guard.new(grid_state_one)
+        expected = Day6::Guard.new(Day6::Map.new(grid_state_two)).current_map
+        guard = Day6::Guard.new(Day6::Map.new(grid_state_one))
         guard.travel!
         actual = guard.current_map
         _(actual).must_equal(expected)
       end
 
       it "goes East when there is an obstacle to the North" do
-        expected = Day6::Guard.new(grid_state_three).current_map
-        guard = Day6::Guard.new(grid_state_two)
+        expected = Day6::Guard.new(Day6::Map.new(grid_state_three)).current_map
+        guard = Day6::Guard.new(Day6::Map.new(grid_state_two))
         guard.travel!
         actual = guard.current_map
         _(actual).must_equal(expected)
       end
       it "goes South when there is an obstacle to the East" do
-        expected = Day6::Guard.new(grid_state_four).current_map
-        guard = Day6::Guard.new(grid_state_three)
+        expected = Day6::Guard.new(Day6::Map.new(grid_state_four)).current_map
+        guard = Day6::Guard.new(Day6::Map.new(grid_state_three))
         guard.travel!
         actual = guard.current_map
         _(actual).must_equal(expected)
       end
       it "goes West when there is an obstacle to the South" do
-        expected = Day6::Guard.new(grid_state_five).current_map
-        guard = Day6::Guard.new(grid_state_four)
+        expected = Day6::Guard.new(Day6::Map.new(grid_state_five)).current_map
+        guard = Day6::Guard.new(Day6::Map.new(grid_state_four))
         guard.travel!
         actual = guard.current_map
         _(actual).must_equal(expected)
       end
       it "eventually reaches the edge of the map" do
-        expected = Day6::Guard.new(grid_state_final).current_map(with_path: true)
-        guard = Day6::Guard.new(grid_state_one)
-        while guard.on_grid?
-          guard.travel!
-        end
+        expected = Day6::Guard.new(Day6::Map.new(grid_state_final)).current_map(with_path: true)
+        guard = Day6::Guard.new(Day6::Map.new(grid_state_one))
+        guard.travel_indefinitely!
         actual = guard.current_map(with_path: true)
         _(actual).must_equal(expected)
       end
     end
+  end
+
+  describe Day6::Map do
   end
 
   describe "part2" do
