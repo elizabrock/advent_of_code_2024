@@ -156,7 +156,7 @@ describe Day6 do
 
   describe "part2" do
     it "overall scenario" do
-      expected = "TBD"
+      expected = 6
       actual = Day6.part2(grid_state_one)
       _(actual).must_equal(expected)
     end

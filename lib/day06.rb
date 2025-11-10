@@ -10,7 +10,24 @@ class Day6
   end
 
   def self.part2(input)
-    "TBD"
+    template = Map.new(input)
+    starting_map = Map.new(input)
+    guard = Guard.new(starting_map)
+    guard.travel_indefinitely!
+    coordinates_to_test = starting_map.each_with_index.map do |item, x, y|
+      [x, y] if item == Map::MARK
+    end.compact
+    puts "We have #{coordinates_to_test.count} promising starting points"
+
+    coordinates_to_test.count do |pair|
+      puts "Testing putting an obstruction at #{pair}"
+      x, y = pair
+      updated_grid = template.to_a
+      updated_grid[x][y] = Map::ADDED_OBSTRUCTION
+      test_map = Map.new(updated_grid)
+      Guard.new(test_map).travel_indefinitely!
+      test_map.loop_detected?
+    end
   end
 
   private
@@ -44,7 +61,7 @@ class Day6
     end
 
     def can_continue_traveling?
-      on_map?
+      on_map? and !@map.loop_detected?
     end
 
     def unique_positions_patrolled_count
@@ -101,14 +118,21 @@ class Day6
     def initialize(input)
       grid = (input.is_a? Array)? input : input.split(/\n/).map{ |line| line.split(//) }
       super(Matrix[*grid])
+      @loop_detected = false
+      @visit_list = []
     end
 
     def can_stand_at?(x, y)
-      self[x, y] == NATURAL_OBSTRUCTION
+      [NATURAL_OBSTRUCTION, ADDED_OBSTRUCTION].include? self[x, y]
+    end
+
+    def loop_detected?
+      @loop_detected
     end
 
     def mark_entering!(x, y, direction)
       return unless valid_coordinate?(x, y)
+      record_visit_to(x, y, direction)
       self[x, y] = direction
     end
 
@@ -131,6 +155,14 @@ class Day6
         # NOTE: Now that this is a proper class, we can probably avoid making the interim arrays
         super().map{ |row| row.map{ |char| (char == Day6::Map::MARK)? OPEN_SPACE : char } }
       end
+    end
+
+    private
+
+    def record_visit_to(x, y, direction)
+      visit = [x, y, direction]
+      @loop_detected = @visit_list.include? visit
+      @visit_list << visit
     end
   end
 end
