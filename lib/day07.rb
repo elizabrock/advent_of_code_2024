@@ -1,23 +1,27 @@
 class Day7
   def self.part1(input)
-    equations = input.split(/\n/).map do |line|
-      answer, operand_string = line.match(/(\d+): (.*)/).captures
-      CalibrationEquation.new(answer.to_i, operand_string.split(/\s+/).map(&:to_i))
-    end
+    equations = parse_input(input)
     equations.keep_if(&:solvable?).sum(&:answer)
   end
 
   def self.part2(input)
-    "TBD"
+    equations = parse_input(input)
+    equations.map(&:enable_concatentation!)
+    equations.keep_if(&:solvable?).sum(&:answer)
   end
 
   class CalibrationEquation
     attr_reader :answer
-    OPERATORS = [:+, :*]
+    CONCATENATION_OPERATOR = '||'
 
     def initialize(answer, operands)
       @answer = answer
       @operands = operands
+      @operators = [:+, :*]
+    end
+
+    def enable_concatentation!
+      @operators << CONCATENATION_OPERATOR
     end
 
     def solvable?
@@ -38,8 +42,13 @@ class Day7
         return permute_possible_calculations(remaining_operands, [operand])
       end
       progress = progress.map do |partial_answer|
-        OPERATORS.map{ |operator|
-          partial_answer.send(operator, operand) }
+        @operators.map do |operator|
+          if operator == CONCATENATION_OPERATOR
+            (partial_answer.to_s + operand.to_s).to_i
+          else
+            partial_answer.send(operator, operand)
+          end
+        end
       end.flatten
       return progress if !remaining_operands
       permute_possible_calculations(remaining_operands, progress)
@@ -49,5 +58,9 @@ class Day7
   private
 
   def self.parse_input(input)
+    input.split(/\n/).map do |line|
+      answer, operand_string = line.match(/(\d+): (.*)/).captures
+      CalibrationEquation.new(answer.to_i, operand_string.split(/\s+/).map(&:to_i))
+    end
   end
 end
