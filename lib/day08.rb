@@ -7,17 +7,19 @@ class Day8
   end
 
   def self.part2(input)
-    "TBD"
+    map = Day8::Map.new(input, infinite_antinodes: true)
+    map.antinode_locations.count
   end
 
   class Map < GeneralMap
     NON_ANTENNA = '.'
     attr_reader :antenna_types
 
-    def initialize(input)
+    def initialize(input, infinite_antinodes: false)
       grid = (input.is_a? Array)? input : input.split(/\n/).map{ |line| line.split(//) }
       super(grid)
       @antenna_types = (grid.flatten.uniq - [NON_ANTENNA])
+      @infinite_antinodes = infinite_antinodes
     end
 
     def antinode_locations
@@ -27,14 +29,14 @@ class Day8
           locations[coords] << antenna_type
         end
       end
-      locations.keys
+      locations.keys.sort
     end
 
     def antinodes_for_antenna_type(antenna_type)
       locations = find_all(antenna_type)
       results = []
       locations.combination(2){ |a, b| results.concat antinodes_for_coords(a, b) }
-      results
+      results.sort
     end
 
     def antinodes_for_coords(coords_a, coords_b)
@@ -42,10 +44,28 @@ class Day8
       b_x, b_y = coords_b
       x_diff = (a_x - b_x)
       y_diff = (a_y - b_y)
-      [
-        [a_x + x_diff, a_y + y_diff],
-        [b_x - x_diff, b_y - y_diff]
-      ].filter{|coords| valid_coordinate? *coords }
+
+      iterate_positive = ->(x, y){ [x + x_diff, y + y_diff] }
+      iterate_negative = ->(x, y){ [x - x_diff, y - y_diff] }
+
+      if @infinite_antinodes
+        antinodes = [coords_a, coords_b]
+        [[iterate_positive, coords_a],
+         [iterate_negative, coords_b]].each do |iterator, starting_coords|
+          next_position = iterator.call *starting_coords
+          while valid_coordinate? *next_position
+            antinodes << next_position
+            break unless @infinite_antinodes
+            next_position = iterator.call *next_position
+          end
+        end
+        antinodes
+      else
+        [
+          iterate_positive.call(a_x, a_y),
+          iterate_negative.call(b_x, b_y)
+        ].filter{|coords| valid_coordinate? *coords }
+      end
     end
   end
 end

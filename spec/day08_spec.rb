@@ -28,6 +28,14 @@ describe Day8 do
     end
   end
 
+  describe "part2" do
+    it "overall scenario" do
+      expected = 34
+      actual = Day8.part2(overall_scenario_input)
+      _(actual).must_equal(expected)
+    end
+  end
+
   describe Day8::Map do
     describe "antenna_types" do
       it "returns the antenna types in the grid" do
@@ -99,7 +107,7 @@ describe Day8 do
           STRING
         expected = Day8::Map.new(output).find_all('#')
         actual = Day8::Map.new(input).antinodes_for_antenna_type('a')
-        _(actual.sort).must_equal(expected)
+        _(actual).must_equal(expected)
       end
 
       it "answers correctly when nodes are mixed" do
@@ -131,7 +139,7 @@ describe Day8 do
           STRING
         expected = Day8::Map.new(output).find_all('#')
         actual = Day8::Map.new(input).antinodes_for_antenna_type('a')
-        _(actual.sort).must_equal(expected)
+        _(actual).must_equal(expected)
       end
     end
 
@@ -169,17 +177,8 @@ describe Day8 do
           STRING
         expected = Day8::Map.new(output).find_all('#')
         actual = Day8::Map.new(input).antinode_locations
-        _(actual.sort).must_equal(expected)
+        _(actual).must_equal(expected)
       end
-    end
-  end
-
-  describe "part2" do
-    it "overall scenario" do
-      input = "TBD"
-      expected = "TBD"
-      actual = Day8.part2(input)
-      _(actual).must_equal(expected)
     end
   end
 end
