@@ -24,12 +24,15 @@ class Day11
     end
 
     def blink!
-      new_stones = []
+      new_stones = Array.new(@stones.length * 1.5)
+      index = 0
       @stones.each do |stone|
+        break if stone.nil?
         if stone == 0
           # If the stone is engraved with the number 0, it is replaced by a stone engraved
           # with the number 1.
-          new_stones << 1
+          new_stones[index] =  1
+          index += 1
         else
           digits = stone.to_s
           if digits.length.even?
@@ -37,12 +40,14 @@ class Day11
             # replaced by two stones. The left half of the digits are engraved on the new left
             # stone, and the right half of the digits are engraved on the new right stone. (The
             # new numbers don't keep extra leading zeroes: 1000 would become stones 10 and 0.)
-            new_stones << digits.slice!(0...digits.length/2).to_i
-            new_stones << digits.to_i
+            new_stones[index] = digits.slice!(0...digits.length/2).to_i
+            new_stones[index+1] =  digits.to_i
+            index += 2
           else
             # If none of the other rules apply, the stone is replaced by a new stone; the old
             # stone's number multiplied by 2024 is engraved on the new stone.
-            new_stones << stone * 2024
+            new_stones[index] = stone * 2024
+            index += 1
           end
         end
       end
@@ -59,12 +64,12 @@ class Day11
     end
 
     def to_s
-      @stones.map(&:to_s).join(" ")
+      @stones.reject(&:nil?).map(&:to_s).join(" ")
     end
 
     def ==(other)
       return false unless other.is_a? PhysicsDefyingStones
-      @stones == other.stones
+      @stones.compact == other.stones.compact
     end
   end
 end
