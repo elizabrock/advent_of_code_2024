@@ -21,6 +21,7 @@ class Day13
       @a_delta_x, @a_delta_y = a_line.match(regex).captures.map(&:to_i)
       @b_delta_x, @b_delta_y = b_line.match(regex).captures.map(&:to_i)
       @goal_x, @goal_y = goal_line.match(regex).captures.map(&:to_i)
+      @limit_to_under_100_presses = !apply_input_correction
       if apply_input_correction
         @goal_x += INPUT_CORRECTION
         @goal_y += INPUT_CORRECTION
@@ -71,7 +72,12 @@ class Day13
       # ====== The actual math
       a_presses = (goal_x * b_delta_y - b_delta_x * goal_y) / (a_delta_x * b_delta_y - b_delta_x * a_delta_y)
       b_presses = (a_delta_x * goal_y - goal_x * a_delta_y) / (a_delta_x * b_delta_y - b_delta_x * a_delta_y)
-      return nil if a_presses > 100 || b_presses > 100
+      return nil if @limit_to_under_100_presses && (a_presses > 100 || b_presses > 100)
+      # I could do this by ensuring that the calculations above are done with floats
+      # and checking for whole numbers, but I like this better.  It feels extra certain.
+      correct_x = a_delta_x * a_presses + b_delta_x * b_presses == goal_x
+      correct_y = a_delta_y * a_presses + b_delta_y * b_presses == goal_y
+      return nil unless correct_x and correct_y
       cost_of(a_presses, b_presses)
     end
   end

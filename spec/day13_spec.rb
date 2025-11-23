@@ -33,8 +33,7 @@ describe Day13 do
 
   describe "part2" do
     it "overall scenario" do
-      skip
-      expected = "TBD"
+      expected = 875318608908
       actual = Day13.part2(input)
       _(actual).must_equal(expected)
     end
@@ -131,16 +130,12 @@ describe Day13 do
       end
 
       describe 'for a corrected machine' do
-        before do
-          skip
-        end
-
         it 'is nil for machine 1' do
           _(machine_1_with_input_correction.minimum_win_cost).must_be_nil
         end
 
         it 'is something for machine 2' do
-          _(machine_2_with_input_correction.minimum_win_cost).must_equal(100)
+          _(machine_2_with_input_correction.minimum_win_cost).must_equal(459236326669)
         end
 
         it 'is nil for machine 3' do
@@ -148,7 +143,7 @@ describe Day13 do
         end
 
         it 'is something for machine 4' do
-          _(machine_4_with_input_correction.minimum_win_cost).must_equal(100)
+          _(machine_4_with_input_correction.minimum_win_cost).must_equal(416082282239)
         end
       end
     end
